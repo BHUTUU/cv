@@ -1,7 +1,7 @@
 // <<<---PDF Download Functionality--->>>
 function downloadPDF() {
     // <<<---Show loading state--->>>
-    const button = document.querySelector('.pdf-download-btn');
+    const button = document.querySelector('.pdf-btn');
     const originalText = button.innerHTML;
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
     button.disabled = true;
@@ -196,64 +196,6 @@ document.addEventListener('DOMContentLoaded', function() {
             downloadPDF();
         }
     });
-
-    // <<<---Add print button functionality (alternative to PDF)--->>>
-    const printButton = document.createElement('button');
-    printButton.innerHTML = '<i class="fas fa-print"></i> Print';
-    printButton.className = 'print-btn';
-    printButton.style.cssText = `
-        position: fixed;
-        top: 30px;
-        right: 200px;
-        background: linear-gradient(135deg, #27ae60, #2ecc71);
-        color: white;
-        border: none;
-        padding: 15px 25px;
-        border-radius: 50px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
-        transition: all 0.3s ease;
-        font-family: inherit;
-        z-index: 1000;
-    `;
-    
-    printButton.addEventListener('click', function() {
-        window.print();
-    });
-    
-    printButton.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-3px)';
-        this.style.boxShadow = '0 15px 40px rgba(39, 174, 96, 0.4)';
-    });
-    
-    printButton.addEventListener('mouseleave', function() {
-        this.style.transform = '';
-        this.style.boxShadow = '0 10px 30px rgba(39, 174, 96, 0.3)';
-    });
-    
-    document.body.appendChild(printButton);
-
-    // <<<---Responsive adjustments for print button--->>>
-    const mediaQuery = window.matchMedia('(max-width: 768px)');
-    function handleResize(e) {
-        if (e.matches) {
-            printButton.style.right = '120px';
-            printButton.style.top = 'auto';
-            printButton.style.bottom = '20px';
-        } else {
-            printButton.style.right = '200px';
-            printButton.style.top = '30px';
-            printButton.style.bottom = 'auto';
-        }
-    }
-    
-    mediaQuery.addListener(handleResize);
-    handleResize(mediaQuery);
 });
 
 // <<<---Add some additional utility functions--->>>
