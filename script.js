@@ -1,3 +1,90 @@
+// <<<---Dark Mode Toggle Functionality--->>>
+function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    // <<<---Apply new theme--->>>
+    html.setAttribute('data-theme', newTheme);
+    
+    // <<<---Save theme preference to localStorage--->>>
+    localStorage.setItem('theme', newTheme);
+    
+    // <<<---Show notification--->>>
+    const themeText = newTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+    showNotification(`${themeText} activated!`, 'success');
+    
+    // <<<---Add smooth transition effect--->>>
+    document.body.style.transition = 'all 0.3s ease';
+    setTimeout(() => {
+        document.body.style.transition = '';
+    }, 300);
+}
+
+// <<<---Initialize theme on page load--->>>
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    } else if (prefersDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+// <<<---Scroll-based toggle button animation--->>>
+let lastScrollTop = 0;
+let isScrolling = false;
+let buttonHidden = false; // <<<---Track if button has been hidden--->>>
+
+function handleScroll() {
+    if (isScrolling) return;
+    
+    isScrolling = true;
+    requestAnimationFrame(() => {
+        const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const themeToggleBtn = document.getElementById('themeToggle');
+        
+        if (themeToggleBtn) {
+            // <<<---Show button only when at top, hide when scrolling down--->>>
+            if (currentScrollTop <= 100) {
+                // <<<---At top - show button--->>>
+                themeToggleBtn.style.transform = 'translateY(0) scale(1)';
+                themeToggleBtn.style.opacity = '1';
+                themeToggleBtn.style.pointerEvents = 'auto';
+                buttonHidden = false; // <<<---Reset hidden state--->>>
+            } else if (currentScrollTop > lastScrollTop && !buttonHidden) {
+                // <<<---Scrolling down and button not yet hidden - hide button--->>>
+                themeToggleBtn.style.transform = 'translateY(-100px) scale(0.8)';
+                themeToggleBtn.style.opacity = '0';
+                themeToggleBtn.style.pointerEvents = 'none';
+                buttonHidden = true; // <<<---Mark as hidden--->>>
+            }
+            // <<<---No else condition - button stays hidden when scrolling up unless at top--->>>
+        }
+        
+        lastScrollTop = currentScrollTop;
+        isScrolling = false;
+    });
+}
+
+// <<<---Throttled scroll handler for better performance--->>>
+function throttleScroll() {
+    let ticking = false;
+    
+    return function() {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                handleScroll();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    };
+}
+
 // <<<---PDF Download Functionality--->>>
 function downloadPDF() {
     // <<<---Show loading state--->>>
@@ -91,6 +178,9 @@ function showNotification(message, type = 'info') {
         font-weight: 500;
         max-width: 400px;
         animation: slideDown 0.3s ease;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     `;
 
     // <<<---Add animation styles--->>>
@@ -142,6 +232,34 @@ function showNotification(message, type = 'info') {
 
 // <<<---Add smooth scrolling for better UX--->>>
 document.addEventListener('DOMContentLoaded', function() {
+    // <<<---Initialize theme--->>>
+    initializeTheme();
+    
+    // <<<---Initialize scroll-based toggle button animation--->>>
+    const themeToggleBtn = document.getElementById('themeToggle');
+    if (themeToggleBtn) {
+        // <<<---Set initial styles for smooth animation--->>>
+        themeToggleBtn.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        themeToggleBtn.style.transform = 'translateY(0) scale(1)';
+        themeToggleBtn.style.opacity = '1';
+        
+        // <<<---Add scroll event listener--->>>
+        window.addEventListener('scroll', throttleScroll());
+        
+        // <<<---Add hover effects--->>>
+        themeToggleBtn.addEventListener('mouseenter', function() {
+            if (window.pageYOffset <= 100) {
+                this.style.transform = 'translateY(-2px) scale(1.05)';
+            }
+        });
+        
+        themeToggleBtn.addEventListener('mouseleave', function() {
+            if (window.pageYOffset <= 100) {
+                this.style.transform = 'translateY(0) scale(1)';
+            }
+        });
+    }
+    
     // <<<---Add smooth scrolling to all internal links--->>>
     const links = document.querySelectorAll('a[href^="#"]');
     links.forEach(link => {
@@ -194,6 +312,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
             e.preventDefault();
             downloadPDF();
+        }
+        
+        // <<<---Ctrl/Cmd + D for dark mode toggle--->>>
+        if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+            e.preventDefault();
+            toggleTheme();
         }
     });
 });
